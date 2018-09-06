@@ -4,12 +4,19 @@
 
 pCCoroutineMalloc g_malloc = malloc;
 pCCoroutineFree g_free = free;
-pCCoroutineLog g_log = [](CCoroutineLogStatus status, const char* pszLog, ...) {
-    va_list args;
-    va_start(args, pszLog);
-    printf(pszLog, args);
-    va_end(args);
-};
+pCCoroutineLog g_log = nullptr;
+
+template<class... _Types>
+void CCoroutinePoolLog(CCoroutineLogStatus status, const char* pLog, _Types&&... _Args) {
+    if (g_log) {
+        char szBuf[256];
+        ccsnprintf(szBuf, 256, pLog, std::forward<_Types>(_Args)...);
+        g_log(status, szBuf);
+    }
+    else {
+        printf(pLog, std::forward<_Types>(_Args)...);
+    }
+}
 void CCorutineInitFunc(pCCoroutineMalloc pMalloc, pCCoroutineFree pFree, pCCoroutineLog pLog) {
     if (pMalloc && pFree) {
         g_malloc = pMalloc;
@@ -196,7 +203,7 @@ void CCorutinePool::FinishFunc(CCorutine* pCorutine) {
     do {
         coctx_swap(&pCorutine->m_ctx, &m_pStackRunCorutine[m_usRunCorutineStack - 1]->m_ctx);
         assert(0);
-        g_log(CCoroutineLogStatus_Error, ("error, finish must be no resume..."));
+        CCoroutinePoolLog(CCoroutineLogStatus_Error, ("error, finish must be no resume..."));
     } while (true);
 }
 
@@ -285,7 +292,7 @@ void CCorutinePoolMgr::CheckAllCorutine() {
         if (CCoroutineUnLikely(m_checkQueue[i]->IsCoroutineError(nowTime))) {
             char szBuf[64];
             m_checkQueue[i]->GetStatus(szBuf, 64);
-            g_log(CCoroutineLogStatus_Error, ("Corutine check error, maybe loop or no wakeup state(%d) (%s)", m_checkQueue[i]->GetCoroutineState(), szBuf));
+            CCoroutinePoolLog(CCoroutineLogStatus_Error, ("Corutine check error, maybe loop or no wakeup state(%d) (%s)", m_checkQueue[i]->GetCoroutineState(), szBuf));
         }
     }
 }

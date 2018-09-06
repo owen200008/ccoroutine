@@ -6,7 +6,7 @@
 
 typedef void*(*pCCoroutineMalloc)(uint32_t);
 typedef void(*pCCoroutineFree)(void*);
-typedef void(*pCCoroutineLog)(CCoroutineLogStatus status, const char* pszLog, ...);
+typedef void(*pCCoroutineLog)(CCoroutineLogStatus status, const char* pszLog);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //初始化调用的函数
 void CCorutineInitFunc(pCCoroutineMalloc pMalloc, pCCoroutineFree pFree, pCCoroutineLog pLog);

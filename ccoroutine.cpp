@@ -4,6 +4,17 @@
 extern pCCoroutineMalloc g_malloc;
 extern pCCoroutineFree g_free;
 extern pCCoroutineLog g_log;
+template<class... _Types>
+void CCoroutineLog(CCoroutineLogStatus status, const char* pLog, _Types&&... _Args) {
+    if (g_log) {
+        char szBuf[256];
+        ccsnprintf(szBuf, 256, pLog, std::forward<_Types>(_Args)...);
+        g_log(status, szBuf);
+    }
+    else {
+        printf(pLog, std::forward<_Types>(_Args)...);
+    }
+}
 
 CCTHREADID_DWORD CCorutineGetThreadID() {
 #ifdef _MSC_VER
@@ -101,7 +112,7 @@ void CCorutine::YieldCorutine() {
     assert(nLength < DEFAULT_CCORUTINE_STACK_SIZE - 10 * 1024);
     static int nTotalUseStackSize = 0;
     if (nLength > nTotalUseStackSize) {
-        g_log(CCoroutineLogStatus_Info, "CCorutinePlusBase::YieldCorutine MaxStack Size %.2fK", (float)nLength / 1024);
+        CCoroutineLog(CCoroutineLogStatus_Info, "CCorutinePlusBase::YieldCorutine MaxStack Size %.2fK", (float)nLength / 1024);
         nTotalUseStackSize = nLength;
     }
 #endif
