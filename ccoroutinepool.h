@@ -4,7 +4,7 @@
 #include "ccoroutine.h"
 #include <atomic>
 
-typedef void*(*pCCoroutineMalloc)(uint32_t);
+typedef void*(*pCCoroutineMalloc)(size_t);
 typedef void(*pCCoroutineFree)(void*);
 typedef void(*pCCoroutineLog)(CCoroutineLogStatus status, const char* pszLog);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
